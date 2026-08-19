@@ -1,0 +1,33 @@
+NormalizedUrl
+if(endsWith(trim(triggerBody()['text']),'/'),substring(trim(triggerBody()['text']),0,sub(length(trim(triggerBody()['text'])),1)),trim(triggerBody()['text']))
+
+Get_site
+_api/web?$select=Title,AssociatedOwnerGroup/Id,AssociatedOwnerGroup/Title,AssociatedMemberGroup/Id,AssociatedMemberGroup/Title,AssociatedVisitorGroup/Id,AssociatedVisitorGroup/Title&$expand=AssociatedOwnerGroup,AssociatedMemberGroup,AssociatedVisitorGroup
+Get_RoleAssignments
+_api/web/roleassignments?$select=PrincipalId,RoleDefinitionBindings/Name&$expand=RoleDefinitionBindings
+
+SetOwnerRole
+if(empty(filter(body('Get_RoleAssignments')?['d']?['results'], equals(item()?['PrincipalId'], int(body('Get_Site')?['d']?['AssociatedOwnerGroup']?['Id'])))), 'Full Control (assumed)', join(select(first(filter(body('Get_RoleAssignments')?['d']?['results'], equals(item()?['PrincipalId'], int(body('Get_Site')?['d']?['AssociatedOwnerGroup']?['Id']))))?['RoleDefinitionBindings']?['results'], item()?['Name']), ', '))
+Step 10
+if(equals(item()?['PrincipalType'],1),'User',if(equals(item()?['PrincipalType'],2),'Distribution List',if(equals(item()?['PrincipalType'],4),'Security Group',if(equals(item()?['PrincipalType'],8),'SharePoint Group','Other'))))
+
+createexportfile
+concat('SiteGroups_', replace(replace(variables('varSiteTitle'), ' ', ''), '/', '-'), '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.csv')
+
+varMessage:
+if(equals(outputs('Get_Site')?['statusCode'], 403), 'You aren''t listed in the Site Collection Administrators for this site. Please confirm you have been added, then try again.', if(or(equals(outputs('Get_Site')?['statusCode'], 404), equals(outputs('Get_Site')?['statusCode'], 400)), 'No SharePoint site was found at that address. Check for typos and use the full site URL, for example https://contoso.sharepoint.com/sites/HR', if(equals(outputs('Get_Site')?['statusCode'], 401), 'Your sign-in to SharePoint could not be validated. Sign out of the app and back in.', if(equals(outputs('Get_Site')?['statusCode'], 429), 'SharePoint is throttling requests right now. Please wait a minute and try again.', concat('Something went wrong retrieving the groups. Details: ', substring(string(result('TRY')), 0, min(400, length(string(result('TRY'))))))))))
+
+
+ResultJson
+{
+  "siteTitle": "<<A>>",
+  "ownersGroup": "<<C>>",
+  "membersGroup": "<<D>>",
+  "visitorsGroup": "<<E>>",
+  "ownersRole": "<<F>>",
+  "membersRole": "<<G>>",
+  "visitorsRole": "<<H>>",
+  "owners": <<I>>,
+  "members": <<J>>,
+  "visitors": <<K>>
+}
