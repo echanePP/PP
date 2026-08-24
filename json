@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/sp/v2/column-formatting.schema.json",
+  "elmType": "div",
+  "style": {
+    "background-color": "=if(Number([$Column1]) < Number([$Column2]), '#fbdcdc', '#d6f5e0')",
+    "padding": "4px 8px",
+    "border-radius": "4px",
+    "color": "=if(Number([$Column1]) < Number([$Column2]), '#a32222', '#1b7a3d')"
+  },
+  "txtContent": "@currentField"
+}
