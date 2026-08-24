@@ -1,0 +1,4 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/sp/v2/row-formatting.schema.json",
+  "additionalRowClass": "=if(Number([$Column1]) < Number([$Column2]), 'sp-field-severity--severeWarning', 'sp-field-severity--good')"
+}
